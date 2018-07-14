@@ -1,0 +1,28 @@
+
+#include "lcore_conf.h"
+struct lcore_conf lcore_conf[RTE_MAX_LCORE];
+     
+int init_lcore_conf(struct lcore_conf *lcore_conf){
+	 uint16_t i, length;
+	 uint8_t lcore_id;
+   
+	 if(lcore_conf==NULL){
+		 printf("parameter:lcore_conf is null\n");
+		 return -1;
+	 }
+     for(i = 0; i < nb_lcore_params; i++) {
+		  lcore_id=lcore_params[i].lcore_id;
+		  length=lcore_conf[lcore_id].length;
+		  if(length >= MAX_RX_QUEUE_PER_LCORE){
+			     printf("error: too many queues for lcore: %u\n",(unsigned)lcore_id);
+				 return -1;
+		  }else{
+				 lcore_conf[lcore_id].port_queue_list[length].rx_port_id=lcore_params[i].port_id;
+				 lcore_conf[lcore_id].port_queue_list[length].rx_queue_id=lcore_params[i].queue_id;
+                 lcore_conf[lcore_id].port_queue_list[length].tx_port_id=lcore_params[i].port_id^1;
+				 lcore_conf[lcore_id].port_queue_list[length].tx_queue_id=0;
+				 lcore_conf[lcore_id].length++;
+		  }
+	 }    
+     return 0;  	
+}
